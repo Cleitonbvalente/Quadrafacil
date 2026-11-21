@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.26",
     "expo-constants": "~57.0.20",
     "expo-linking": "~57.0.11",
@@ -19,10 +21,19 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "api": "npm --prefix backend start",
+    "api:dev": "npm --prefix backend run dev",
+    "api:instalar": "npm --prefix backend install",
+    "api:testes": "npm --prefix backend test",
+    "web:gerar": "expo export --platform web --output-dir dist",
+    "apresentacao": "npm run web:gerar && npm run api",
+    "tunel": "node scripts/tunel.js"
   },
   "private": true,
   "devDependencies": {
+    "@types/react": "~19.2.4",
+    "qrcode-terminal": "^0.12.0",
     "typescript": "~6.0.3"
   }
 }

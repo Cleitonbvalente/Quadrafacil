@@ -1,71 +1,126 @@
 # QuadraFácil — App Mobile (React Native / Expo Router)
 
-Aplicativo mobile de reserva de quadras esportivas públicas municipais.
-Este repositório contém a implementação em **React Native (Expo)** — a etapa
-"Tela Inicial" da disciplina, com a base de navegação já pronta para as
-próximas telas.
+Aplicativo para reservar o ginásio municipal da cidade. O ginásio funciona de
+**segunda a sexta das 17h às 22h** e **sábado e domingo das 7h às 22h**. Ele é
+da escola, então **a escola sempre tem prioridade**: se ela precisar de um
+horário que alguém já reservou, a reserva é cancelada e a pessoa recebe uma
+notificação no app explicando o motivo.
 
 Projeto irmão desta mesma disciplina: Justificativa de Negócio, Protótipo de
 Baixa Fidelidade e Engenharia de Requisitos (documento e slides separados).
 
+## Perfis
+
+| Perfil | O que faz |
+| --- | --- |
+| Visitante | Vê a agenda do ginásio sem precisar de conta |
+| Morador | Reserva horários livres, cancela as próprias reservas, recebe notificações |
+| Escola | Reserva horários para a escola (com motivo), cancelando reservas que estiverem no caminho, e libera horários depois |
+
+Contas de demonstração (a API cria sozinha na primeira vez que roda):
+
+- Morador: `demo@quadrafacil.com` / `123456`
+- Escola: `escola@quadrafacil.com` / `escola123`
+
+## Regras de uso
+
+- Reservas de 1 hora, de hoje até 7 dias à frente.
+- Cada pessoa pode ter até 3 reservas marcadas e 1 por dia, para todo mundo conseguir usar o ginásio.
+- Horários que já começaram não podem ser reservados nem cancelados.
+- A escola pode reservar com até 60 dias de antecedência e sempre informa o motivo.
+
+Os limites ficam em `backend/regras.js` e podem ser ajustados lá.
+
 ## Estrutura
 
 ```
-app/                    ← cada arquivo é uma tela (Expo Router)
-  _layout.js            ← navegação (Stack) entre as telas
-  index.js              ← Tela 1: Início (Visitante) — IMPLEMENTADA
-  quadras.js             ← Visitante: Quadras Disponíveis (placeholder)
-  login.js               ← Tela 2: Login / Cadastro (placeholder)
-  home.js                 ← Tela 3: Início (Logado) (placeholder)
-  nova-reserva.js         ← Tela 4: Nova Reserva (placeholder)
-  confirmacao.js          ← Tela 5: Confirmação (placeholder)
-  minhas-reservas.js      ← Tela 6: Minhas Reservas (placeholder)
-  perfil.js               ← Tela 7: Meu Perfil (placeholder)
-components/
-  PlaceholderScreen.js   ← tela reutilizável "em construção" para as próximas etapas
-constants/
-  theme.js               ← paleta de cores e espaçamentos do QuadraFácil
+app/                          telas (cada arquivo é uma rota do Expo Router)
+  index.js                    início para visitantes
+  agenda.js                   agenda do ginásio (aberta a todos)
+  login.js                    entrar / criar conta
+  home.js                     início do morador
+  nova-reserva.js             escolher dia, horário e modalidade
+  confirmacao.js              reserva confirmada
+  minhas-reservas.js          próximas reservas e histórico
+  notificacoes.js             avisos de cancelamento pela escola
+  perfil.js                   dados da conta e sair
+  escola.js                   painel da escola
+components/                   peças visuais reutilizadas (botões, seletor de datas, horários...)
+constants/                    tema visual e endereço da API
+contexts/AppContext.js        sessão, agenda, reservas e notificações
+hooks/                        atualização ao abrir a tela e proteção das telas por perfil
+services/api.js               chamadas HTTP para a API
+data/                         funções de datas e da agenda
+backend/                      API em Node.js + Express + MySQL
 ```
 
-As telas placeholder já estão registradas na navegação e mostram quais
-requisitos (RF01–RF15, ver documento de Engenharia de Requisitos) cada uma vai
-implementar — é só substituir o conteúdo de cada arquivo nas próximas entregas.
+## Como rodar
 
-## Como rodar (primeira vez)
-
-Este projeto foi montado remotamente, então o `node_modules` não foi
-instalado por aqui. Abra um terminal **na sua máquina** (PowerShell ou o
-terminal do VS Code), navegue até esta pasta e rode, nesta ordem:
+O passo a passo completo do banco está em [`backend/README.md`](backend/README.md).
+Com o banco pronto, são dois terminais na raiz do projeto:
 
 ```bash
-# 1. (uma vez) apague a pasta de tentativa anterior, se ela ainda existir:
-#    _node_modules_DELETE_ME
+# terminal 1: a API (na primeira vez, rode antes: npm run api:instalar)
+npm run api
 
-# 2. instale as dependências base
-npm install
-
-# 3. instale o Expo Router e suas dependências nativas
-npx expo install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants
-
-# 4. rode o app
+# terminal 2: o app (na primeira vez, rode antes: npm install)
 npx expo start
 ```
 
-Depois do `npx expo start`, abra o app **Expo Go** no seu celular (Android ou
-iOS) e escaneie o QR Code que aparecer no terminal — ou pressione `w` para
-abrir no navegador.
+Depois do `npx expo start`, pressione `w` para abrir no navegador ou escaneie o
+QR Code com o Expo Go no celular (mesmo Wi-Fi do notebook).
 
-## Por que instalar localmente?
+Para rodar os testes automáticos da API: `npm run api:testes`.
 
-A instalação de `node_modules` foi tentada por aqui, mas a pasta do projeto
-está dentro do OneDrive, e o OneDrive deixa operações em massa (milhares de
-arquivos pequenos do `node_modules`) muito lentas por essa ponte remota.
-Rodando direto na sua máquina, sem esse intermediário, o `npm install` deve
-levar menos de um minuto.
+## Colocar online para uma apresentação
 
-Dica: se quiser evitar que o OneDrive fique sincronizando o `node_modules`
-toda vez (deixa tudo mais lento), você pode clicar com o botão direito na
-pasta `node_modules` depois de criada e escolher "Sempre manter neste
-dispositivo" → "Liberar espaço" não se aplica aqui, mas o ideal mesmo é, no
-futuro, desenvolver fora de uma pasta sincronizada e só subir o código
-(sem `node_modules`, que já está no `.gitignore`) para o GitHub.
+O notebook vira o servidor e o Cloudflare cria um link público temporário,
+gratuito e sem precisar de conta. Quem tiver o link abre o app no navegador do
+celular, sem instalar nada.
+
+Uma vez só, antes do dia:
+
+1. Baixe e instale o `cloudflared` para Windows (instalador `.msi` de 64 bits) em
+   https://developers.cloudflare.com/tunnel/downloads/
+2. Feche e abra o terminal de novo, e rode `npm install` na pasta do projeto.
+
+No dia, com o MySQL ligado, abra dois terminais na pasta do projeto:
+
+```bash
+# terminal 1: gera a versão web do app e liga a API servindo o app
+npm run apresentacao
+
+# terminal 2: cria o link público e mostra um QR Code
+npm run tunel
+```
+
+O terminal 2 mostra o link `https://....trycloudflare.com` e um QR Code para
+colocar no slide ou apontar a câmera. O link muda toda vez que você roda
+`npm run tunel` e para de funcionar quando você fecha um dos dois terminais.
+
+Cuidados:
+
+- O notebook precisa ficar ligado e na internet durante a apresentação.
+- Gere o link pouco antes de apresentar e teste no seu celular usando os dados móveis, fora do Wi-Fi.
+- O Cloudflare não garante que o link fique no ar e aceita até 200 acessos ao mesmo tempo. Leve prints das telas como plano B.
+- As contas de demonstração aparecem na tela de login, então qualquer pessoa com o link consegue entrar como escola.
+
+## Sobre as notificações
+
+Quando a escola cancela uma reserva, a pessoa recebe:
+
+- um aviso que aparece no topo da tela enquanto o app está aberto (o app confere a cada 30 segundos e sempre que volta a ser aberto);
+- um selo vermelho no sino do início;
+- a notificação completa, com o motivo, na tela Notificações;
+- a reserva marcada como "Cancelada pela escola" no histórico, também com o motivo.
+
+Notificações push com o app fechado exigem um build próprio do app (EAS Build)
+e um servidor de push. O Expo Go não permite isso no Android, por isso esta
+versão usa notificações dentro do app.
+
+## Por que não instalar `node_modules` pela ponte remota?
+
+A pasta do projeto está no OneDrive, e operações com milhares de arquivos
+pequenos (como o `node_modules`) ficam muito lentas pela ponte remota. Por
+isso `npm install`, `npx expo start` e a configuração do MySQL são feitos
+direto no seu terminal.
